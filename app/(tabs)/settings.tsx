@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Switch, ScrollView, Platform, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Switch, ScrollView, Platform, Alert, Modal } from "react-native";
 import { useRouter } from "expo-router";
 import * as Notifications from "expo-notifications";
 import * as Haptics from "expo-haptics";
@@ -39,6 +39,7 @@ export default function SettingsScreen() {
   });
   const [trialDays, setTrialDays] = useState(0);
   const [hasSubscription, setHasSubscription] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -199,9 +200,14 @@ export default function SettingsScreen() {
                 <Text className="text-2xl font-bold text-foreground">
                   {formatTime(notificationSettings.hour, notificationSettings.minute)}
                 </Text>
-                <Text className="text-xs text-muted mt-2">
-                  Tap to change time (coming soon)
-                </Text>
+                <TouchableOpacity
+                  onPress={() => setShowTimePicker(true)}
+                  className="mt-3 bg-primary/10 rounded-full py-2 px-4 self-start active:opacity-70"
+                >
+                  <Text className="text-sm font-medium" style={{ color: colors.primary }}>
+                    Change Time
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
           </View>
@@ -220,6 +226,129 @@ export default function SettingsScreen() {
           <View className="h-8" />
         </View>
       </ScrollView>
+
+      {/* Time Picker Modal */}
+      <Modal
+        visible={showTimePicker}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowTimePicker(false)}
+      >
+        <View className="flex-1 justify-center items-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <View className="bg-background rounded-3xl p-6 mx-6 w-80" style={{ maxWidth: '90%' }}>
+            <Text className="text-2xl font-bold text-foreground mb-6 text-center">Set Reminder Time</Text>
+            
+            {/* Hour Picker */}
+            <View className="mb-6">
+              <Text className="text-sm font-medium text-muted mb-3">Hour</Text>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                className="flex-row gap-2"
+                contentContainerStyle={{ paddingHorizontal: 8 }}
+              >
+                {Array.from({ length: 24 }, (_, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setNotificationSettings({ ...notificationSettings, hour: i });
+                    }}
+                    className="rounded-xl py-3 px-4 min-w-[60px] items-center active:opacity-70"
+                    style={{
+                      backgroundColor: notificationSettings.hour === i ? colors.primary : colors.surface,
+                    }}
+                  >
+                    <Text
+                      className="text-lg font-semibold"
+                      style={{ color: notificationSettings.hour === i ? '#FFFFFF' : colors.foreground }}
+                    >
+                      {i.toString().padStart(2, '0')}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Minute Picker */}
+            <View className="mb-6">
+              <Text className="text-sm font-medium text-muted mb-3">Minute</Text>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                className="flex-row gap-2"
+                contentContainerStyle={{ paddingHorizontal: 8 }}
+              >
+                {[0, 15, 30, 45].map((minute) => (
+                  <TouchableOpacity
+                    key={minute}
+                    onPress={() => {
+                      if (Platform.OS !== 'web') {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }
+                      setNotificationSettings({ ...notificationSettings, minute });
+                    }}
+                    className="rounded-xl py-3 px-4 min-w-[60px] items-center active:opacity-70"
+                    style={{
+                      backgroundColor: notificationSettings.minute === minute ? colors.primary : colors.surface,
+                    }}
+                  >
+                    <Text
+                      className="text-lg font-semibold"
+                      style={{ color: notificationSettings.minute === minute ? '#FFFFFF' : colors.foreground }}
+                    >
+                      {minute.toString().padStart(2, '0')}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Preview */}
+            <View className="bg-surface rounded-2xl p-4 mb-6">
+              <Text className="text-sm text-muted text-center mb-1">Selected Time</Text>
+              <Text className="text-3xl font-bold text-foreground text-center">
+                {formatTime(notificationSettings.hour, notificationSettings.minute)}
+              </Text>
+            </View>
+
+            {/* Buttons */}
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                onPress={() => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  }
+                  setShowTimePicker(false);
+                }}
+                className="flex-1 border-2 rounded-full py-3 items-center active:opacity-70"
+                style={{ borderColor: colors.border }}
+              >
+                <Text className="font-semibold text-foreground">Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={async () => {
+                  if (Platform.OS !== 'web') {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  }
+                  await saveSettings(notificationSettings);
+                  if (notificationSettings.enabled) {
+                    await scheduleNotification(notificationSettings.hour, notificationSettings.minute);
+                  }
+                  setShowTimePicker(false);
+                }}
+                className="flex-1 rounded-full py-3 items-center active:opacity-80"
+                style={{ backgroundColor: colors.primary }}
+              >
+                <Text className="font-semibold text-white">Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 }

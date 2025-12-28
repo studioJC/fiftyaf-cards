@@ -90,3 +90,16 @@
 - [x] Verify notification time picker is working (displays time, change coming soon)
 - [x] Test payment flow and paywall screen (accessible from Settings)
 - [ ] Create checkpoint with design updates
+
+## Additional Features
+
+- [x] Implement native time picker in Settings for notification customization
+- [ ] Generate remaining 28 card designs (cards 22-49)
+- [ ] Create audio insights for new 28 cards
+- [ ] Update cards.ts with new card metadata
+- [x] Implement favorites feature with AsyncStorage
+- [x] Add favorite toggle button to card screens
+- [x] Create Favorites filter in Library
+- [ ] Test time picker on iOS/Android
+- [ ] Test favorites functionality
+- [ ] Create checkpoint with all new features

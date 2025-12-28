@@ -11,6 +11,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getStreakData, recordTodaysVisit, getStreakMilestoneMessage, type StreakData } from "@/lib/streak-tracking";
 import { shareCard } from "@/lib/social-share";
+import { toggleFavorite, isFavorite } from "@/lib/favorites";
 
 export default function TodayScreen() {
   const colors = useColors();
@@ -19,6 +20,7 @@ export default function TodayScreen() {
   const [isNewCard, setIsNewCard] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [streakData, setStreakData] = useState<StreakData | null>(null);
+  const [isFavorited, setIsFavorited] = useState(false);
   
   const player = useAudioPlayer(card?.audio);
 
@@ -61,6 +63,10 @@ export default function TodayScreen() {
       const result = await getTodaysCard();
       setCard(result.card);
       setIsNewCard(result.isNew);
+      
+      // Load favorite status
+      const favoriteStatus = await isFavorite(result.card.id);
+      setIsFavorited(favoriteStatus);
     } catch (error) {
       console.error("Error loading today's card:", error);
     } finally {
@@ -96,6 +102,10 @@ export default function TodayScreen() {
       setCard(newCard);
       setIsNewCard(true);
       
+      // Load favorite status for new card
+      const favoriteStatus = await isFavorite(newCard.id);
+      setIsFavorited(favoriteStatus);
+      
       // Stop current audio if playing
       if (player && player.playing) {
         player.pause();
@@ -105,6 +115,17 @@ export default function TodayScreen() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleToggleFavorite() {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    if (!card) return;
+
+    const newStatus = await toggleFavorite(card.id);
+    setIsFavorited(newStatus);
   }
 
   function handlePlayPause() {
@@ -216,19 +237,37 @@ export default function TodayScreen() {
           </View>
 
           {/* Action Buttons */}
-          <View className="flex-row gap-3">
-            <TouchableOpacity
-              onPress={() => shareCard(card)}
-              className="flex-1 border-2 border-primary rounded-full py-3 px-6 items-center active:opacity-70"
-            >
-              <Text className="text-primary font-semibold">Share Card</Text>
-            </TouchableOpacity>
+          <View className="gap-3">
+            <View className="flex-row gap-3">
+              <TouchableOpacity
+                onPress={handleToggleFavorite}
+                className="flex-1 border-2 rounded-full py-3 px-6 items-center active:opacity-70"
+                style={{ borderColor: isFavorited ? colors.primary : colors.border }}
+              >
+                <View className="flex-row items-center gap-2">
+                  <Text className="text-xl">{isFavorited ? "❤️" : "🤍"}</Text>
+                  <Text
+                    className="font-semibold"
+                    style={{ color: isFavorited ? colors.primary : colors.muted }}
+                  >
+                    {isFavorited ? "Favorited" : "Favorite"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => shareCard(card)}
+                className="flex-1 border-2 border-primary rounded-full py-3 px-6 items-center active:opacity-70"
+              >
+                <Text className="text-primary font-semibold">Share</Text>
+              </TouchableOpacity>
+            </View>
             
             <TouchableOpacity
               onPress={handleDrawNewCard}
-              className="flex-1 bg-primary rounded-full py-3 px-6 items-center active:opacity-80"
+              className="bg-primary rounded-full py-3 px-6 items-center active:opacity-80"
             >
-              <Text className="text-white font-semibold">Draw New</Text>
+              <Text className="text-white font-semibold">Draw New Card</Text>
             </TouchableOpacity>
           </View>
 

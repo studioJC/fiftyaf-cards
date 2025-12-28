@@ -1,20 +1,37 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ScrollView, Text, View, TouchableOpacity, Image, FlatList } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { Platform } from "react-native";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { CARDS, DOMAINS, type CardDomain } from "@/constants/cards";
+import { getFavorites } from "@/lib/favorites";
 import { useColors } from "@/hooks/use-colors";
 
 export default function LibraryScreen() {
   const colors = useColors();
   const router = useRouter();
-  const [selectedDomain, setSelectedDomain] = useState<CardDomain | "All">("All");
+  const [selectedDomain, setSelectedDomain] = useState<CardDomain | "All" | "Favorites">("All");
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadFavorites();
+    }, [])
+  );
+
+  async function loadFavorites() {
+    const favorites = await getFavorites();
+    setFavoriteIds(favorites);
+  }
 
   const filteredCards =
-    selectedDomain === "All" ? CARDS : CARDS.filter((card) => card.domain === selectedDomain);
+    selectedDomain === "All"
+      ? CARDS
+      : selectedDomain === "Favorites"
+      ? CARDS.filter((card) => favoriteIds.includes(card.id))
+      : CARDS.filter((card) => card.domain === selectedDomain);
 
   function handleCardPress(cardId: number) {
     if (Platform.OS !== "web") {
@@ -23,7 +40,7 @@ export default function LibraryScreen() {
     router.push({ pathname: "/card/[id]" as any, params: { id: cardId.toString() } });
   }
 
-  function handleDomainPress(domain: CardDomain | "All") {
+  function handleDomainPress(domain: CardDomain | "All" | "Favorites") {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -59,6 +76,24 @@ export default function LibraryScreen() {
             >
               All
             </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => handleDomainPress("Favorites")}
+            className={`px-4 py-2 rounded-full ${
+              selectedDomain === "Favorites" ? "bg-primary" : "bg-surface border border-border"
+            }`}
+          >
+            <View className="flex-row items-center gap-1">
+              <Text className="text-base">{selectedDomain === "Favorites" ? "❤️" : "🤍"}</Text>
+              <Text
+                className={`text-sm font-medium ${
+                  selectedDomain === "Favorites" ? "text-white" : "text-foreground"
+                }`}
+              >
+                Favorites {favoriteIds.length > 0 && `(${favoriteIds.length})`}
+              </Text>
+            </View>
           </TouchableOpacity>
 
           {DOMAINS.map((domain) => (
