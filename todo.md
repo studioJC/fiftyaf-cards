@@ -49,3 +49,18 @@
 - [x] Add habit formation guidance to onboarding
 - [ ] Test onboarding flow
 - [ ] Create final checkpoint
+
+## Social Sharing & Streak Tracking
+
+- [x] Create social sharing functionality for cards
+- [x] Add share button to Today's Card screen
+- [x] Add share button to Card Detail screen
+- [x] Generate shareable card text with branding
+- [x] Implement streak tracking system
+- [x] Create streak storage with AsyncStorage
+- [x] Add streak counter to home screen
+- [x] Add milestone messages (7, 30, 66 days)
+- [ ] Build streak calendar view (optional enhancement)
+- [ ] Test social sharing on iOS/Android
+- [ ] Test streak tracking logic
+- [ ] Create checkpoint with new features

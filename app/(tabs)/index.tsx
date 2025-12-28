@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
-import { ScrollView, Text, View, TouchableOpacity, Image, ActivityIndicator, Platform } from "react-native";
+import { useState, useEffect, useCallback } from "react";
+import { ScrollView, Text, View, TouchableOpacity, Image, ActivityIndicator, Platform, Alert } from "react-native";
 import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Haptics from "expo-haptics";
+import { useFocusEffect } from "expo-router";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { Card } from "@/constants/cards";
 import { getTodaysCard, drawNewCard } from "@/lib/card-storage";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { getStreakData, recordTodaysVisit, getStreakMilestoneMessage, type StreakData } from "@/lib/streak-tracking";
+import { shareCard } from "@/lib/social-share";
 
 export default function TodayScreen() {
   const colors = useColors();
@@ -15,6 +18,7 @@ export default function TodayScreen() {
   const [loading, setLoading] = useState(true);
   const [isNewCard, setIsNewCard] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [streakData, setStreakData] = useState<StreakData | null>(null);
   
   const player = useAudioPlayer(card?.audio);
 
@@ -22,7 +26,15 @@ export default function TodayScreen() {
   useEffect(() => {
     loadTodaysCard();
     setupAudio();
+    loadStreak();
   }, []);
+
+  // Reload streak when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      loadStreak();
+    }, [])
+  );
 
   // Track player state
   useEffect(() => {
@@ -53,6 +65,23 @@ export default function TodayScreen() {
       console.error("Error loading today's card:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadStreak() {
+    try {
+      const data = await recordTodaysVisit();
+      setStreakData(data);
+      
+      // Show milestone message if reached
+      const milestone = getStreakMilestoneMessage(data.currentStreak);
+      if (milestone && data.currentStreak > 1) {
+        setTimeout(() => {
+          Alert.alert("Streak Milestone!", milestone, [{ text: "Keep Going!" }]);
+        }, 500);
+      }
+    } catch (error) {
+      console.error("Error loading streak:", error);
     }
   }
 
@@ -112,12 +141,27 @@ export default function TodayScreen() {
     <ScreenContainer>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="flex-1 p-6 gap-6">
-          {/* Header */}
-          <View className="items-center gap-1">
-            <Text className="text-sm text-muted uppercase tracking-wide">
-              {isNewCard ? "Today's Card" : "Your Card for Today"}
-            </Text>
-            <Text className="text-xs text-muted">{today}</Text>
+          {/* Header with Streak */}
+          <View className="items-center gap-3">
+            <View className="items-center gap-1">
+              <Text className="text-sm text-muted uppercase tracking-wide">
+                {isNewCard ? "Today's Card" : "Your Card for Today"}
+              </Text>
+              <Text className="text-xs text-muted">{today}</Text>
+            </View>
+            
+            {/* Streak Counter */}
+            {streakData && streakData.currentStreak > 0 && (
+              <View className="bg-surface rounded-full px-6 py-3 flex-row items-center gap-2">
+                <Text className="text-2xl">🔥</Text>
+                <View>
+                  <Text className="text-lg font-bold text-foreground">
+                    {streakData.currentStreak} {streakData.currentStreak === 1 ? "Day" : "Days"}
+                  </Text>
+                  <Text className="text-xs text-muted">Current Streak</Text>
+                </View>
+              </View>
+            )}
           </View>
 
           {/* Card Image */}
@@ -171,13 +215,22 @@ export default function TodayScreen() {
             </Text>
           </View>
 
-          {/* Draw New Card Button */}
-          <TouchableOpacity
-            onPress={handleDrawNewCard}
-            className="border-2 border-primary rounded-full py-3 px-6 items-center active:opacity-70"
-          >
-            <Text className="text-primary font-semibold">Draw New Card</Text>
-          </TouchableOpacity>
+          {/* Action Buttons */}
+          <View className="flex-row gap-3">
+            <TouchableOpacity
+              onPress={() => shareCard(card)}
+              className="flex-1 border-2 border-primary rounded-full py-3 px-6 items-center active:opacity-70"
+            >
+              <Text className="text-primary font-semibold">Share Card</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={handleDrawNewCard}
+              className="flex-1 bg-primary rounded-full py-3 px-6 items-center active:opacity-80"
+            >
+              <Text className="text-white font-semibold">Draw New</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Spacer */}
           <View className="h-8" />

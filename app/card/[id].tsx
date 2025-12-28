@@ -8,6 +8,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { getCardById, type Card } from "@/constants/cards";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { shareCard } from "@/lib/social-share";
 
 export default function CardDetailScreen() {
   const colors = useColors();
@@ -153,6 +154,14 @@ export default function CardDetailScreen() {
                 ~77 seconds • Ends with "Be Kind & Curious"
               </Text>
             </View>
+
+            {/* Share Button */}
+            <TouchableOpacity
+              onPress={() => shareCard(card)}
+              className="border-2 border-primary rounded-full py-3 px-6 items-center active:opacity-70"
+            >
+              <Text className="text-primary font-semibold">Share This Card</Text>
+            </TouchableOpacity>
 
             {/* Spacer */}
             <View className="h-8" />
