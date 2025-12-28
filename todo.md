@@ -23,3 +23,18 @@
 - [x] Generate custom app icon
 - [ ] Test all user flows end-to-end
 - [ ] Create first checkpoint for user testing
+
+## New Features (User Requested)
+
+- [x] Implement animated shuffle for manual card draw
+- [ ] Add save card to camera roll functionality (placeholder added, needs expo-media-library)
+- [x] Build Reflection Journal screen with note-taking
+- [x] Implement journal entry list and detail views
+- [x] Add push notification system for daily reminders
+- [x] Create Settings screen with notification time picker
+- [x] Implement 3-day free trial system
+- [x] Build subscription management (99¢/week)
+- [x] Integrate Revolut payment link
+- [x] Add subscription status checking
+- [x] Create paywall screen for trial expiry
+- [ ] Test all new features end-to-end
