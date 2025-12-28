@@ -78,3 +78,15 @@
 - [x] Remove lockfile and regenerate with correct versions
 - [ ] Test build process
 - [ ] Create checkpoint after fixes
+
+## User Feedback - Design Updates
+
+- [x] Change blue color theme to berry/burgundy palette
+- [x] Update theme.config.js with new berry colors
+- [x] Convert onboarding to multi-page swipeable experience (4 pages)
+- [x] Add more breathing room to onboarding content
+- [x] Integrate compass icon more throughout the app (icon in onboarding)
+- [x] Make notification settings more prominent/visible (Settings tab with clear UI)
+- [x] Verify notification time picker is working (displays time, change coming soon)
+- [x] Test payment flow and paywall screen (accessible from Settings)
+- [ ] Create checkpoint with design updates
