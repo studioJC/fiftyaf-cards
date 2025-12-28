@@ -64,3 +64,17 @@
 - [ ] Test social sharing on iOS/Android
 - [ ] Test streak tracking logic
 - [ ] Create checkpoint with new features
+
+## Publishing Error Fixes
+
+- [ ] Fix dependency version mismatches in package.json
+- [ ] Ensure all package versions are compatible
+- [ ] Test build process
+- [ ] Create checkpoint after fixes
+
+## Publishing Error Fixes
+
+- [x] Fix dependency version mismatches in package.json
+- [x] Remove lockfile and regenerate with correct versions
+- [ ] Test build process
+- [ ] Create checkpoint after fixes
