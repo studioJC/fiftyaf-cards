@@ -1,46 +1,186 @@
-import { ScrollView, Text, View, TouchableOpacity } from "react-native";
+import { useState, useEffect } from "react";
+import { ScrollView, Text, View, TouchableOpacity, Image, ActivityIndicator, Platform } from "react-native";
+import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
+import * as Haptics from "expo-haptics";
 
 import { ScreenContainer } from "@/components/screen-container";
+import { Card } from "@/constants/cards";
+import { getTodaysCard, drawNewCard } from "@/lib/card-storage";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useColors } from "@/hooks/use-colors";
 
-/**
- * Home Screen - NativeWind Example
- *
- * This template uses NativeWind (Tailwind CSS for React Native).
- * You can use familiar Tailwind classes directly in className props.
- *
- * Key patterns:
- * - Use `className` instead of `style` for most styling
- * - Theme colors: use tokens directly (bg-background, text-foreground, bg-primary, etc.); no dark: prefix needed
- * - Responsive: standard Tailwind breakpoints work on web
- * - Custom colors defined in tailwind.config.js
- */
-export default function HomeScreen() {
+export default function TodayScreen() {
+  const colors = useColors();
+  const [card, setCard] = useState<Card | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isNewCard, setIsNewCard] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  const player = useAudioPlayer(card?.audio);
+
+  // Load today's card on mount
+  useEffect(() => {
+    loadTodaysCard();
+    setupAudio();
+  }, []);
+
+  // Track player state
+  useEffect(() => {
+    if (!player) return;
+
+    const interval = setInterval(() => {
+      setIsPlaying(player.playing);
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [player]);
+
+  async function setupAudio() {
+    try {
+      await setAudioModeAsync({ playsInSilentMode: true });
+    } catch (error) {
+      console.error("Error setting audio mode:", error);
+    }
+  }
+
+  async function loadTodaysCard() {
+    setLoading(true);
+    try {
+      const result = await getTodaysCard();
+      setCard(result.card);
+      setIsNewCard(result.isNew);
+    } catch (error) {
+      console.error("Error loading today's card:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDrawNewCard() {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+    
+    setLoading(true);
+    try {
+      const newCard = await drawNewCard();
+      setCard(newCard);
+      setIsNewCard(true);
+      
+      // Stop current audio if playing
+      if (player && player.playing) {
+        player.pause();
+      }
+    } catch (error) {
+      console.error("Error drawing new card:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handlePlayPause() {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+
+    if (!player) return;
+
+    if (player.playing) {
+      player.pause();
+    } else {
+      player.play();
+    }
+  }
+
+  if (loading || !card) {
+    return (
+      <ScreenContainer className="items-center justify-center">
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text className="mt-4 text-muted">Drawing your card...</Text>
+      </ScreenContainer>
+    );
+  }
+
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
-    <ScreenContainer className="p-6">
+    <ScreenContainer>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 gap-8">
-          {/* Hero Section */}
-          <View className="items-center gap-2">
-            <Text className="text-4xl font-bold text-foreground">Welcome</Text>
-            <Text className="text-base text-muted text-center">
-              Edit app/(tabs)/index.tsx to get started
+        <View className="flex-1 p-6 gap-6">
+          {/* Header */}
+          <View className="items-center gap-1">
+            <Text className="text-sm text-muted uppercase tracking-wide">
+              {isNewCard ? "Today's Card" : "Your Card for Today"}
             </Text>
+            <Text className="text-xs text-muted">{today}</Text>
           </View>
 
-          {/* Example Card */}
-          <View className="w-full max-w-sm self-center bg-surface rounded-2xl p-6 shadow-sm border border-border">
-            <Text className="text-lg font-semibold text-foreground mb-2">NativeWind Ready</Text>
-            <Text className="text-sm text-muted leading-relaxed">
-              Use Tailwind CSS classes directly in your React Native components.
-            </Text>
+          {/* Card Image */}
+          <View className="w-full aspect-video rounded-2xl overflow-hidden bg-surface shadow-lg">
+            <Image
+              source={card.image}
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="cover"
+            />
           </View>
 
-          {/* Example Button */}
-          <View className="items-center">
-            <TouchableOpacity className="bg-primary px-6 py-3 rounded-full active:opacity-80">
-              <Text className="text-background font-semibold">Get Started</Text>
+          {/* Card Title & Domain */}
+          <View className="items-center gap-1">
+            <Text className="text-3xl font-bold text-foreground tracking-wide">
+              {card.title.toUpperCase()}
+            </Text>
+            <Text className="text-sm text-muted">{card.domain}</Text>
+          </View>
+
+          {/* Audio Player */}
+          <View className="bg-surface rounded-2xl p-6 gap-4 shadow-sm">
+            <Text className="text-base text-foreground text-center leading-relaxed">
+              {card.summary}
+            </Text>
+
+            <TouchableOpacity
+              onPress={handlePlayPause}
+              className="bg-primary rounded-full py-4 px-8 items-center active:opacity-80"
+              style={{
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
+              }}
+            >
+              <View className="flex-row items-center gap-2">
+                <IconSymbol
+                  name={isPlaying ? "pause.fill" : "play.fill"}
+                  size={24}
+                  color="#FFFFFF"
+                />
+                <Text className="text-white font-semibold text-lg">
+                  {isPlaying ? "Pause Insight" : "Play Insight"}
+                </Text>
+              </View>
             </TouchableOpacity>
+
+            <Text className="text-xs text-muted text-center">
+              ~77 seconds • Ends with "Be Kind & Curious"
+            </Text>
           </View>
+
+          {/* Draw New Card Button */}
+          <TouchableOpacity
+            onPress={handleDrawNewCard}
+            className="border-2 border-primary rounded-full py-3 px-6 items-center active:opacity-70"
+          >
+            <Text className="text-primary font-semibold">Draw New Card</Text>
+          </TouchableOpacity>
+
+          {/* Spacer */}
+          <View className="h-8" />
         </View>
       </ScrollView>
     </ScreenContainer>
