@@ -38,3 +38,14 @@
 - [x] Add subscription status checking
 - [x] Create paywall screen for trial expiry
 - [ ] Test all new features end-to-end
+
+## Branding Update
+
+- [x] Update app name to "FiftyAF Minute Moment"
+- [x] Update app.config.ts with new app name
+- [x] Create onboarding screen with benefits and tips
+- [x] Implement first-launch detection for onboarding
+- [x] Add journaling tips to onboarding
+- [x] Add habit formation guidance to onboarding
+- [ ] Test onboarding flow
+- [ ] Create final checkpoint

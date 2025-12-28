@@ -18,6 +18,9 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
+import { useRouter } from "expo-router";
+import { hasCompletedOnboarding } from "./onboarding";
+import { getSubscriptionStatus } from "@/lib/subscription";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
@@ -27,15 +30,52 @@ export const unstable_settings = {
 };
 
 export default function RootLayout() {
+  const router = useRouter();
   const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
   const initialFrame = initialWindowMetrics?.frame ?? DEFAULT_WEB_FRAME;
 
   const [insets, setInsets] = useState<EdgeInsets>(initialInsets);
   const [frame, setFrame] = useState<Rect>(initialFrame);
+  const [isReady, setIsReady] = useState(false);
 
   // Initialize Manus runtime for cookie injection from parent container
   useEffect(() => {
     initManusRuntime();
+  }, []);
+
+  // Check onboarding and subscription status on app start
+  useEffect(() => {
+    async function checkInitialRoute() {
+      try {
+        // Check onboarding status
+        const completedOnboarding = await hasCompletedOnboarding();
+        
+        if (!completedOnboarding) {
+          // First time user - show onboarding
+          router.replace("/onboarding" as any);
+          setIsReady(true);
+          return;
+        }
+
+        // Check subscription status
+        const subscriptionStatus = await getSubscriptionStatus();
+        
+        if (!subscriptionStatus.isActive) {
+          // Trial expired and no subscription - show paywall
+          router.replace("/paywall" as any);
+          setIsReady(true);
+          return;
+        }
+
+        // User has access - proceed to main app
+        setIsReady(true);
+      } catch (error) {
+        console.error("Error checking initial route:", error);
+        setIsReady(true);
+      }
+    }
+
+    checkInitialRoute();
   }, []);
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
@@ -85,7 +125,12 @@ export default function RootLayout() {
           {/* Default to hiding native headers so raw route segments don't appear (e.g. "(tabs)", "products/[id]"). */}
           {/* If a screen needs the native header, explicitly enable it and set a human title via Stack.Screen options. */}
           <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="onboarding" />
+            <Stack.Screen name="paywall" />
             <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="card/[id]" />
+            <Stack.Screen name="journal/new" />
+            <Stack.Screen name="journal/[id]" />
             <Stack.Screen name="oauth/callback" />
           </Stack>
           <StatusBar style="auto" />
