@@ -103,3 +103,21 @@
 - [ ] Test time picker on iOS/Android
 - [ ] Test favorites functionality
 - [ ] Create checkpoint with all new features
+
+## Analytics & Beta Testing
+
+- [x] Install Mixpanel SDK
+- [ ] Set up Mixpanel project and get API key (user needs to create account)
+- [x] Create analytics utility with event tracking
+- [x] Track app opens and daily active users
+- [x] Track card draws (daily/manual)
+- [x] Track audio insight plays
+- [x] Track favorites added/removed
+- [x] Track journal entries created
+- [x] Track streak milestones
+- [x] Track notification scheduling
+- [x] Track onboarding completion and trial start
+- [x] Create beta testing guide document
+- [x] Document how to install via Expo Go
+- [x] Document how to provide feedback
+- [ ] Create checkpoint with analytics

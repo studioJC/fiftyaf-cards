@@ -18,6 +18,7 @@ import { createJournalEntry } from "@/lib/journal-storage";
 import { type Card } from "@/constants/cards";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
+import { trackJournalEntryCreated } from "@/lib/analytics";
 
 export default function NewJournalEntryScreen() {
   const colors = useColors();
@@ -54,6 +55,9 @@ export default function NewJournalEntryScreen() {
     setSaving(true);
     try {
       await createJournalEntry(card.id, card.title, reflection.trim());
+      
+      // Track journal entry creation
+      trackJournalEntryCreated(card.id, card.title);
       
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

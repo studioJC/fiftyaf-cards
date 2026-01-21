@@ -6,6 +6,7 @@ import { useState, useRef } from "react";
 
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
+import { trackOnboardingCompleted, trackTrialStarted } from "@/lib/analytics";
 
 const ONBOARDING_KEY = "@fiftyaf:onboarding_completed";
 const { width } = Dimensions.get("window");
@@ -99,6 +100,10 @@ export default function OnboardingScreen() {
 
     // Mark onboarding as completed
     await AsyncStorage.setItem(ONBOARDING_KEY, "true");
+    
+    // Track onboarding completion and trial start
+    trackOnboardingCompleted();
+    trackTrialStarted();
     
     // Navigate to main app
     router.replace("/" as any);

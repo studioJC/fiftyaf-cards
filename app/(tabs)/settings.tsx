@@ -9,6 +9,7 @@ import { ScreenContainer } from "@/components/screen-container";
 import { getSubscriptionStatus, getTrialDaysRemaining } from "@/lib/subscription";
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { trackNotificationScheduled } from "@/lib/analytics";
 
 const NOTIFICATION_SETTINGS_KEY = "@reinvention_cards:notification_settings";
 
@@ -337,6 +338,8 @@ export default function SettingsScreen() {
                   await saveSettings(notificationSettings);
                   if (notificationSettings.enabled) {
                     await scheduleNotification(notificationSettings.hour, notificationSettings.minute);
+                    // Track notification scheduling
+                    trackNotificationScheduled(notificationSettings.hour, notificationSettings.minute);
                   }
                   setShowTimePicker(false);
                 }}

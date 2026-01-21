@@ -11,6 +11,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getStreakData, recordTodaysVisit, getStreakMilestoneMessage, type StreakData } from "@/lib/streak-tracking";
 import { shareCard } from "@/lib/social-share";
+import { trackCardDrawn, trackAudioPlayed, trackFavoriteToggled, trackCardShared, trackStreakMilestone } from "@/lib/analytics";
 import { toggleFavorite, isFavorite } from "@/lib/favorites";
 
 export default function TodayScreen() {
@@ -64,6 +65,11 @@ export default function TodayScreen() {
       setCard(result.card);
       setIsNewCard(result.isNew);
       
+      // Track card draw
+      if (result.isNew) {
+        trackCardDrawn(result.card.id, result.card.title, true);
+      }
+      
       // Load favorite status
       const favoriteStatus = await isFavorite(result.card.id);
       setIsFavorited(favoriteStatus);
@@ -82,6 +88,7 @@ export default function TodayScreen() {
       // Show milestone message if reached
       const milestone = getStreakMilestoneMessage(data.currentStreak);
       if (milestone && data.currentStreak > 1) {
+        trackStreakMilestone(data.currentStreak);
         setTimeout(() => {
           Alert.alert("Streak Milestone!", milestone, [{ text: "Keep Going!" }]);
         }, 500);
@@ -101,6 +108,9 @@ export default function TodayScreen() {
       const newCard = await drawNewCard();
       setCard(newCard);
       setIsNewCard(true);
+      
+      // Track manual card draw
+      trackCardDrawn(newCard.id, newCard.title, false);
       
       // Load favorite status for new card
       const favoriteStatus = await isFavorite(newCard.id);
@@ -126,6 +136,9 @@ export default function TodayScreen() {
 
     const newStatus = await toggleFavorite(card.id);
     setIsFavorited(newStatus);
+    
+    // Track favorite toggle
+    trackFavoriteToggled(card.id, card.title, newStatus);
   }
 
   function handlePlayPause() {
@@ -139,6 +152,10 @@ export default function TodayScreen() {
       player.pause();
     } else {
       player.play();
+      // Track audio play
+      if (card) {
+        trackAudioPlayed(card.id, card.title);
+      }
     }
   }
 
