@@ -1,9 +1,8 @@
 import { Mixpanel } from "mixpanel-react-native";
 
-// Mixpanel token - replace with your actual token from mixpanel.com
-// For beta testing, you can use a test token or disable tracking
-const MIXPANEL_TOKEN = "YOUR_MIXPANEL_TOKEN_HERE";
-const ENABLE_ANALYTICS = false; // Set to true when you have a Mixpanel token
+// Mixpanel token from environment variable
+const MIXPANEL_TOKEN = process.env.EXPO_PUBLIC_MIXPANEL_TOKEN || "";
+const ENABLE_ANALYTICS = !!MIXPANEL_TOKEN; // Enabled when token is configured
 
 let mixpanel: Mixpanel | null = null;
 
@@ -12,7 +11,7 @@ let mixpanel: Mixpanel | null = null;
  * Call this once when the app starts
  */
 export async function initAnalytics() {
-  if (!ENABLE_ANALYTICS || !MIXPANEL_TOKEN || MIXPANEL_TOKEN === "YOUR_MIXPANEL_TOKEN_HERE") {
+  if (!ENABLE_ANALYTICS || !MIXPANEL_TOKEN) {
     console.log("[Analytics] Disabled - no token configured");
     return;
   }

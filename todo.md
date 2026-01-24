@@ -121,3 +121,17 @@
 - [x] Document how to install via Expo Go
 - [x] Document how to provide feedback
 - [ ] Create checkpoint with analytics
+
+
+## Referral System & Mixpanel Configuration
+
+- [x] Configure Mixpanel token via secrets
+- [x] Create referral code generation system
+- [x] Build referral tracking with AsyncStorage
+- [x] Implement reward tier logic (1 referral = 1 week, 3 = 1 month)
+- [x] Add floating share button on home screen
+- [x] Hide share button until user subscribes (paywall enforcement)
+- [x] Track referral events in Mixpanel
+- [x] Display referral stats in Settings
+- [x] Test complete referral flow (server restarted successfully)
+- [ ] Create checkpoint with referral system

@@ -10,6 +10,8 @@ import { getSubscriptionStatus, getTrialDaysRemaining } from "@/lib/subscription
 import { useColors } from "@/hooks/use-colors";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { trackNotificationScheduled } from "@/lib/analytics";
+import { getReferralStats, type ReferralStats } from "@/lib/referral";
+import { Share } from "react-native";
 
 const NOTIFICATION_SETTINGS_KEY = "@reinvention_cards:notification_settings";
 
@@ -41,10 +43,12 @@ export default function SettingsScreen() {
   const [trialDays, setTrialDays] = useState(0);
   const [hasSubscription, setHasSubscription] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [referralStats, setReferralStats] = useState<ReferralStats | null>(null);
 
   useEffect(() => {
     loadSettings();
     loadSubscriptionInfo();
+    loadReferralStats();
   }, []);
 
   async function loadSettings() {
@@ -55,6 +59,15 @@ export default function SettingsScreen() {
       }
     } catch (error) {
       console.error("Error loading notification settings:", error);
+    }
+  }
+
+  async function loadReferralStats() {
+    try {
+      const stats = await getReferralStats();
+      setReferralStats(stats);
+    } catch (error) {
+      console.error("Error loading referral stats:", error);
     }
   }
 
@@ -177,6 +190,46 @@ export default function SettingsScreen() {
               </Text>
             </TouchableOpacity>
           </View>
+
+          {/* Referral Section (Subscribers Only) */}
+          {hasSubscription && referralStats && (
+            <View className="bg-surface rounded-2xl p-4 gap-4">
+              <Text className="text-lg font-semibold text-foreground">Invite Friends</Text>
+              
+              <View className="gap-3">
+                <View className="flex-row items-center justify-between py-2">
+                  <Text className="text-sm text-muted">Your Referral Code</Text>
+                  <Text className="text-xl font-bold text-primary">{referralStats.myCode}</Text>
+                </View>
+                
+                <View className="flex-row items-center justify-between py-2">
+                  <Text className="text-sm text-muted">Friends Joined</Text>
+                  <Text className="text-lg font-semibold text-foreground">{referralStats.subscribedReferrals}</Text>
+                </View>
+                
+                <View className="flex-row items-center justify-between py-2">
+                  <Text className="text-sm text-muted">Free Weeks Earned</Text>
+                  <Text className="text-lg font-semibold text-foreground">{referralStats.freeWeeksEarned}</Text>
+                </View>
+                
+                {referralStats.currentMonthReferrals > 0 && (
+                  <View className="flex-row items-center justify-between py-2">
+                    <Text className="text-sm text-muted">This Month</Text>
+                    <Text className="text-lg font-semibold text-foreground">
+                      {referralStats.currentMonthReferrals}/3 {referralStats.currentMonthReferrals >= 3 ? "🎉" : ""}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              
+              <View className="bg-primary/10 rounded-xl p-3">
+                <Text className="text-xs text-foreground leading-relaxed">
+                  • 1 friend subscribes = 1 free week{"\n"}
+                  • 3 friends in a month = 1 free month bonus
+                </Text>
+              </View>
+            </View>
+          )}
 
           {/* Notifications Section */}
           <View className="bg-surface rounded-2xl p-4 gap-4">

@@ -11,8 +11,11 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getStreakData, recordTodaysVisit, getStreakMilestoneMessage, type StreakData } from "@/lib/streak-tracking";
 import { shareCard } from "@/lib/social-share";
-import { trackCardDrawn, trackAudioPlayed, trackFavoriteToggled, trackCardShared, trackStreakMilestone } from "@/lib/analytics";
+import { trackCardDrawn, trackAudioPlayed, trackFavoriteToggled, trackCardShared, trackStreakMilestone, trackEvent } from "@/lib/analytics";
 import { toggleFavorite, isFavorite } from "@/lib/favorites";
+import { getSubscriptionStatus } from "@/lib/subscription";
+import { getReferralShareMessage } from "@/lib/referral";
+import { Share } from "react-native";
 
 export default function TodayScreen() {
   const colors = useColors();
@@ -22,6 +25,7 @@ export default function TodayScreen() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [streakData, setStreakData] = useState<StreakData | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [isSubscriber, setIsSubscriber] = useState(false);
   
   const player = useAudioPlayer(card?.audio);
 
@@ -30,6 +34,7 @@ export default function TodayScreen() {
     loadTodaysCard();
     setupAudio();
     loadStreak();
+    checkSubscriptionStatus();
   }, []);
 
   // Reload streak when screen comes into focus
@@ -80,6 +85,15 @@ export default function TodayScreen() {
     }
   }
 
+  async function checkSubscriptionStatus() {
+    try {
+      const status = await getSubscriptionStatus();
+      setIsSubscriber(status.isActive);
+    } catch (error) {
+      console.error("Error checking subscription:", error);
+    }
+  }
+
   async function loadStreak() {
     try {
       const data = await recordTodaysVisit();
@@ -124,6 +138,23 @@ export default function TodayScreen() {
       console.error("Error drawing new card:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleShareApp() {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    try {
+      const message = await getReferralShareMessage();
+      await Share.share({
+        message,
+      });
+      
+      trackEvent("App Shared");
+    } catch (error) {
+      console.error("Error sharing app:", error);
     }
   }
 
@@ -292,6 +323,23 @@ export default function TodayScreen() {
           <View className="h-8" />
         </View>
       </ScrollView>
+
+      {/* Floating Share App Button (Subscribers Only) */}
+      {isSubscriber && (
+        <TouchableOpacity
+          onPress={handleShareApp}
+          className="absolute bottom-24 right-6 bg-primary rounded-full p-4 items-center justify-center shadow-lg active:opacity-80"
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 6,
+            elevation: 8,
+          }}
+        >
+          <IconSymbol name="paperplane.fill" size={28} color="#FFFFFF" />
+        </TouchableOpacity>
+      )}
     </ScreenContainer>
   );
 }
