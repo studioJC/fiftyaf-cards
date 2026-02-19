@@ -54,6 +54,9 @@ export default function RootLayout() {
   useEffect(() => {
     async function checkInitialRoute() {
       try {
+        // Wait for navigation to be ready
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         // Check onboarding status
         const completedOnboarding = await hasCompletedOnboarding();
         
@@ -83,7 +86,7 @@ export default function RootLayout() {
     }
 
     checkInitialRoute();
-  }, []);
+  }, [router]);
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
     setInsets(metrics.insets);

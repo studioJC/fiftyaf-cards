@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open FiftyAF Minute Moment in Expo Go</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            margin: 10px 0;
+            transition: transform 0.2s;
+        }
+        .button:active {
+            transform: scale(0.95);
+        }
+        .instructions {
+            margin-top: 30px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎴 FiftyAF Minute Moment</h1>
+        <p>Tap the button below to open in Expo Go</p>
+        
+        <a href="exp://8081-iflmjpzqouvj5dc9qqoqi-b31f922f.sg1.manus.computer" class="button">
+            Open in Expo Go
+        </a>
+        
+        <div class="instructions">
+            <p><strong>Don't have Expo Go?</strong></p>
+            <p>Download it from the App Store first, then return to this page.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-redirect after 1 second
+        setTimeout(() => {
+            window.location.href = "exp://8081-iflmjpzqouvj5dc9qqoqi-b31f922f.sg1.manus.computer";
+        }, 1000);
+    </script>
+</body>
+</html>

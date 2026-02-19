@@ -135,3 +135,30 @@
 - [x] Display referral stats in Settings
 - [x] Test complete referral flow (server restarted successfully)
 - [ ] Create checkpoint with referral system
+
+## Deployment Preparation (URGENT - Today)
+
+- [x] Fix Expo Go connection issues (Metro running)
+- [ ] Fix NavigationContainer render error
+- [ ] Verify Metro bundler is running correctly
+- [ ] Test app loads in Expo Go successfully
+- [ ] Verify all 21 cards load with images and audio
+- [ ] Test referral system and share functionality
+- [ ] Test paywall and subscription flow
+- [ ] Verify Mixpanel analytics is tracking events
+- [ ] Create production build for deployment
+- [ ] Prepare App Store/Play Store assets (if needed)
+- [ ] Deploy app and provide access link to user
+
+## App Rebranding - "FiftyAF Daily Draw"
+
+- [x] Update app name to "FiftyAF Daily Draw" in app.config.ts
+- [x] Integrate new logo (FiftyAF.png) as app icon
+- [x] Update splash screen with new logo
+- [x] Update Android adaptive icon with new logo
+- [x] Update favicon with new logo
+- [x] Update paywall to show weekly ($0.99/week) and annual ($49/year) options
+- [x] Update Revolut payment link for weekly subscription
+- [ ] Add annual payment link placeholder (waiting for user)
+- [x] Test app loads with new branding
+- [ ] Create checkpoint with rebranding complete

@@ -7,13 +7,17 @@ import { ScreenContainer } from "@/components/screen-container";
 import { getSubscriptionStatus, getTrialDaysRemaining, type SubscriptionStatus } from "@/lib/subscription";
 import { useColors } from "@/hooks/use-colors";
 
-const REVOLUT_PAYMENT_LINK = "https://checkout.revolut.com/pay/b77a8136-7bc0-4176-a6ad-7430f9b3f6e3";
+const REVOLUT_WEEKLY_LINK = "https://checkout.revolut.com/pay/b77a8136-7bc0-4176-a6ad-7430f9b3f6e3";
+const REVOLUT_ANNUAL_LINK = ""; // TODO: Add annual payment link when provided by user
+
+type PricingOption = "weekly" | "annual";
 
 export default function PaywallScreen() {
   const colors = useColors();
   const router = useRouter();
   const [status, setStatus] = useState<SubscriptionStatus | null>(null);
   const [daysRemaining, setDaysRemaining] = useState(0);
+  const [selectedPlan, setSelectedPlan] = useState<PricingOption>("weekly");
 
   useEffect(() => {
     loadStatus();
@@ -37,11 +41,18 @@ export default function PaywallScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
+    const paymentLink = selectedPlan === "weekly" ? REVOLUT_WEEKLY_LINK : REVOLUT_ANNUAL_LINK;
+
+    if (!paymentLink) {
+      console.error("Payment link not configured for selected plan");
+      return;
+    }
+
     try {
-      const supported = await Linking.canOpenURL(REVOLUT_PAYMENT_LINK);
+      const supported = await Linking.canOpenURL(paymentLink);
       
       if (supported) {
-        await Linking.openURL(REVOLUT_PAYMENT_LINK);
+        await Linking.openURL(paymentLink);
       } else {
         console.error("Cannot open payment link");
       }
@@ -56,6 +67,13 @@ export default function PaywallScreen() {
     }
     // Reload status to check if payment was completed
     loadStatus();
+  }
+
+  function handleSelectPlan(plan: PricingOption) {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setSelectedPlan(plan);
   }
 
   if (!status) {
@@ -125,13 +143,49 @@ export default function PaywallScreen() {
           </View>
         </View>
 
-        {/* Pricing */}
-        <View className="items-center gap-2">
-          <Text className="text-4xl font-bold text-foreground">99¢</Text>
-          <Text className="text-sm text-muted">per week</Text>
-          {isTrialActive && (
-            <Text className="text-xs text-muted">Cancel anytime during trial</Text>
-          )}
+        {/* Pricing Options */}
+        <View className="w-full max-w-sm gap-3">
+          {/* Weekly Option */}
+          <TouchableOpacity
+            onPress={() => handleSelectPlan("weekly")}
+            className="rounded-2xl p-4 border-2"
+            style={{
+              backgroundColor: selectedPlan === "weekly" ? colors.primary + "20" : colors.surface,
+              borderColor: selectedPlan === "weekly" ? colors.primary : colors.border,
+            }}
+          >
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-lg font-semibold text-foreground">Weekly</Text>
+                <Text className="text-sm text-muted">Flexible, cancel anytime</Text>
+              </View>
+              <View className="items-end">
+                <Text className="text-2xl font-bold text-foreground">99¢</Text>
+                <Text className="text-xs text-muted">per week</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+
+          {/* Annual Option */}
+          <TouchableOpacity
+            onPress={() => handleSelectPlan("annual")}
+            className="rounded-2xl p-4 border-2"
+            style={{
+              backgroundColor: selectedPlan === "annual" ? colors.primary + "20" : colors.surface,
+              borderColor: selectedPlan === "annual" ? colors.primary : colors.border,
+            }}
+          >
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-lg font-semibold text-foreground">Annual</Text>
+                <Text className="text-sm text-muted">Best value - save 6%</Text>
+              </View>
+              <View className="items-end">
+                <Text className="text-2xl font-bold text-foreground">$49</Text>
+                <Text className="text-xs text-muted">per year</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* Subscribe Button */}
@@ -148,7 +202,9 @@ export default function PaywallScreen() {
                 elevation: 3,
               }}
             >
-              <Text className="text-white font-semibold text-lg">Subscribe Now</Text>
+              <Text className="text-white font-semibold text-lg">
+                Subscribe {selectedPlan === "weekly" ? "Weekly" : "Annually"}
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
