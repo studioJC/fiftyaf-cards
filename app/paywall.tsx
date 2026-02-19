@@ -7,8 +7,8 @@ import { ScreenContainer } from "@/components/screen-container";
 import { getSubscriptionStatus, getTrialDaysRemaining, type SubscriptionStatus } from "@/lib/subscription";
 import { useColors } from "@/hooks/use-colors";
 
-const REVOLUT_WEEKLY_LINK = "https://checkout.revolut.com/pay/b77a8136-7bc0-4176-a6ad-7430f9b3f6e3";
-const REVOLUT_ANNUAL_LINK = ""; // TODO: Add annual payment link when provided by user
+const STRIPE_WEEKLY_LINK = "https://buy.stripe.com/28E14mgvh4lbb7werf5kk01";
+const STRIPE_ANNUAL_LINK = "https://buy.stripe.com/5kQ5kCgvh6tjfnMdnb5kk00";
 
 type PricingOption = "weekly" | "annual";
 
@@ -41,7 +41,7 @@ export default function PaywallScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
-    const paymentLink = selectedPlan === "weekly" ? REVOLUT_WEEKLY_LINK : REVOLUT_ANNUAL_LINK;
+    const paymentLink = selectedPlan === "weekly" ? STRIPE_WEEKLY_LINK : STRIPE_ANNUAL_LINK;
 
     if (!paymentLink) {
       console.error("Payment link not configured for selected plan");

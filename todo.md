@@ -161,4 +161,13 @@
 - [x] Update Revolut payment link for weekly subscription
 - [ ] Add annual payment link placeholder (waiting for user)
 - [x] Test app loads with new branding
-- [ ] Create checkpoint with rebranding complete
+- [x] Create checkpoint with rebranding complete
+
+## Stripe Payment Integration
+
+- [x] Replace Revolut links with Stripe payment links
+- [x] Update weekly subscription link (Stripe)
+- [x] Update annual subscription link (Stripe)
+- [x] Test payment flow with Stripe links
+- [ ] Create checkpoint with Stripe integration
+- [ ] Prepare Google Play Store deployment
