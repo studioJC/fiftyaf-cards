@@ -97,6 +97,11 @@ const config: ExpoConfig = {
       {
         android: {
           buildArchs: ["armeabi-v7a", "arm64-v8a"],
+          compileSdkVersion: 34,
+          targetSdkVersion: 34,
+          minSdkVersion: 23,
+          kotlinVersion: "1.9.22",
+          gradleVersion: "8.3",
         },
       },
     ],
