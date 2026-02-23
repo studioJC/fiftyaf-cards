@@ -1,7 +1,6 @@
 import { Platform, Share, Alert } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Sharing from "expo-sharing";
-import * as FileSystem from "expo-file-system/legacy";
 import { captureRef } from "react-native-view-shot";
 import { Card } from "@/constants/cards";
 import { RefObject } from "react";
@@ -19,10 +18,18 @@ export async function shareCardImage(
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
+    // For now, just use text sharing since image capture has rendering issues
+    // TODO: Fix image capture timing issue
+    return shareCardText(card);
+
+    /* Image sharing disabled due to view rendering timing issues
     if (!viewRef.current) {
       console.error("View ref not available");
       return shareCardText(card);
     }
+
+    // Wait for view to render
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     // Capture the view as an image
     const uri = await captureRef(viewRef, {
@@ -34,7 +41,6 @@ export async function shareCardImage(
 
     // Share the image
     if (Platform.OS === "web") {
-      // Web fallback to text sharing
       return shareCardText(card);
     }
 
@@ -45,11 +51,12 @@ export async function shareCardImage(
 
     await Sharing.shareAsync(uri, {
       mimeType: "image/png",
-      dialogTitle: `Today's FiftyAF Minute Moment: ${card.title}`,
+      dialogTitle: `Today's FiftyAF Daily Draw: ${card.title}`,
     });
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     return true;
+    */
   } catch (error) {
     console.error("Error sharing card image:", error);
     // Fallback to text sharing
@@ -58,7 +65,7 @@ export async function shareCardImage(
 }
 
 /**
- * Share a card as text (fallback method)
+ * Share a card as text with meaningful insight
  */
 export async function shareCardText(card: Card): Promise<boolean> {
   try {
@@ -66,11 +73,14 @@ export async function shareCardText(card: Card): Promise<boolean> {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
-    const message = `Today's FiftyAF Minute Moment:\n\n${card.title.toUpperCase()}\n${card.domain}\n\n#FiftyAF #DailyReflection #BeKindAndCurious`;
+    // Extract first sentence or meaningful part of summary as the insight
+    const insight = card.summary.split('.')[0] + '.';
+
+    const message = `Today's FiftyAF Daily Draw:\n\n${card.title.toUpperCase()}\n${card.domain}\n\n"${insight}"\n\n#FiftyAF #DailyReflection #BeKindAndCurious`;
 
     const result = await Share.share({
       message,
-      title: `${card.title} - FiftyAF Minute Moment`,
+      title: `${card.title} - FiftyAF Daily Draw`,
     });
 
     if (result.action === Share.sharedAction) {
@@ -103,5 +113,6 @@ export async function shareCard(card: Card): Promise<boolean> {
  * Get shareable text for a card
  */
 export function getShareableText(card: Card): string {
-  return `Today's FiftyAF Minute Moment:\n\n${card.title.toUpperCase()}\n${card.domain}\n\n#FiftyAF #DailyReflection #BeKindAndCurious`;
+  const insight = card.summary.split('.')[0] + '.';
+  return `Today's FiftyAF Daily Draw:\n\n${card.title.toUpperCase()}\n${card.domain}\n\n"${insight}"\n\n#FiftyAF #DailyReflection #BeKindAndCurious`;
 }

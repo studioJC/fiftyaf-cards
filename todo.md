@@ -180,3 +180,12 @@
 - [x] Test navigation fix
 - [x] Test new share functionality
 - [x] Create checkpoint with fixes
+
+## Share Feature Fixes
+
+- [x] Fix image sharing error (view not rendering before capture)
+- [x] Improve share text to include meaningful insight quote
+- [x] Update share title from "FiftyAF Minute Moment" to "FiftyAF Daily Draw"
+- [x] Format share text like manual edit example
+- [x] Test share functionality
+- [x] Create checkpoint with fixes
