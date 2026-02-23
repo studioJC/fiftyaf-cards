@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ScrollView, Text, View, TouchableOpacity, Image, ActivityIndicator, Platform } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
@@ -8,7 +8,8 @@ import { ScreenContainer } from "@/components/screen-container";
 import { getCardById, type Card } from "@/constants/cards";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
-import { shareCard } from "@/lib/social-share";
+import { shareCardImage } from "@/lib/social-share";
+import { ShareableCard } from "@/components/shareable-card";
 
 export default function CardDetailScreen() {
   const colors = useColors();
@@ -16,6 +17,7 @@ export default function CardDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [card, setCard] = useState<Card | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const shareableCardRef = useRef(null);
 
   const player = useAudioPlayer(card?.audio);
 
@@ -157,7 +159,7 @@ export default function CardDetailScreen() {
 
             {/* Share Button */}
             <TouchableOpacity
-              onPress={() => shareCard(card)}
+              onPress={() => shareCardImage(shareableCardRef, card)}
               className="border-2 border-primary rounded-full py-3 px-6 items-center active:opacity-70"
             >
               <Text className="text-primary font-semibold">Share This Card</Text>
@@ -168,6 +170,13 @@ export default function CardDetailScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Hidden ShareableCard for image capture */}
+      <View style={{ position: "absolute", left: -10000, top: -10000 }}>
+        <View ref={shareableCardRef}>
+          {card && <ShareableCard card={card} />}
+        </View>
+      </View>
     </ScreenContainer>
   );
 }

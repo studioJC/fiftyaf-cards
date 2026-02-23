@@ -1,23 +1,72 @@
 import { Platform, Share, Alert } from "react-native";
 import * as Haptics from "expo-haptics";
+import * as Sharing from "expo-sharing";
+import * as FileSystem from "expo-file-system/legacy";
+import { captureRef } from "react-native-view-shot";
 import { Card } from "@/constants/cards";
+import { RefObject } from "react";
 
 /**
- * Share a card to social media
- * Note: For full image sharing with custom branding, we would need:
- * - expo-sharing package for native sharing
- * - expo-file-system for file operations
- * - Canvas/Image manipulation library to add branding overlay
- * 
- * For now, this shares the card title and message as text
+ * Share a card as an image to social media
+ * This captures the ShareableCard component as an image and shares it
  */
-export async function shareCard(card: Card): Promise<boolean> {
+export async function shareCardImage(
+  viewRef: RefObject<any>,
+  card: Card
+): Promise<boolean> {
   try {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
 
-    const message = `Today's FiftyAF Minute Moment:\n\n${card.title.toUpperCase()}\n${card.domain}\n\n"${card.summary}"\n\n#FiftyAF #DailyReflection #BeKindAndCurious`;
+    if (!viewRef.current) {
+      console.error("View ref not available");
+      return shareCardText(card);
+    }
+
+    // Capture the view as an image
+    const uri = await captureRef(viewRef, {
+      format: "png",
+      quality: 1,
+      width: 1080,
+      height: 1080,
+    });
+
+    // Share the image
+    if (Platform.OS === "web") {
+      // Web fallback to text sharing
+      return shareCardText(card);
+    }
+
+    const isAvailable = await Sharing.isAvailableAsync();
+    if (!isAvailable) {
+      return shareCardText(card);
+    }
+
+    await Sharing.shareAsync(uri, {
+      mimeType: "image/png",
+      dialogTitle: `Today's FiftyAF Minute Moment: ${card.title}`,
+    });
+
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    return true;
+  } catch (error) {
+    console.error("Error sharing card image:", error);
+    // Fallback to text sharing
+    return shareCardText(card);
+  }
+}
+
+/**
+ * Share a card as text (fallback method)
+ */
+export async function shareCardText(card: Card): Promise<boolean> {
+  try {
+    if (Platform.OS !== "web") {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }
+
+    const message = `Today's FiftyAF Minute Moment:\n\n${card.title.toUpperCase()}\n${card.domain}\n\n#FiftyAF #DailyReflection #BeKindAndCurious`;
 
     const result = await Share.share({
       message,
@@ -44,27 +93,15 @@ export async function shareCard(card: Card): Promise<boolean> {
 }
 
 /**
- * Get shareable text for a card
+ * Legacy function for backward compatibility
  */
-export function getShareableText(card: Card): string {
-  return `Today's FiftyAF Minute Moment:\n\n${card.title.toUpperCase()}\n${card.domain}\n\n"${card.summary}"\n\n#FiftyAF #DailyReflection #BeKindAndCurious`;
+export async function shareCard(card: Card): Promise<boolean> {
+  return shareCardText(card);
 }
 
 /**
- * Copy card text to clipboard
+ * Get shareable text for a card
  */
-export async function copyCardToClipboard(card: Card): Promise<boolean> {
-  try {
-    // Note: Would need expo-clipboard package for full clipboard support
-    // For now, just show success message
-    Alert.alert(
-      "Coming Soon",
-      "Copy to clipboard feature will be available in the next update.",
-      [{ text: "OK" }]
-    );
-    return false;
-  } catch (error) {
-    console.error("Error copying to clipboard:", error);
-    return false;
-  }
+export function getShareableText(card: Card): string {
+  return `Today's FiftyAF Minute Moment:\n\n${card.title.toUpperCase()}\n${card.domain}\n\n#FiftyAF #DailyReflection #BeKindAndCurious`;
 }

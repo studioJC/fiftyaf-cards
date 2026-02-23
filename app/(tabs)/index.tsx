@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ScrollView, Text, View, TouchableOpacity, Image, ActivityIndicator, Platform, Alert } from "react-native";
 import { useAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Haptics from "expo-haptics";
@@ -10,7 +10,8 @@ import { getTodaysCard, drawNewCard } from "@/lib/card-storage";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useColors } from "@/hooks/use-colors";
 import { getStreakData, recordTodaysVisit, getStreakMilestoneMessage, type StreakData } from "@/lib/streak-tracking";
-import { shareCard } from "@/lib/social-share";
+import { shareCardImage, shareCardText } from "@/lib/social-share";
+import { ShareableCard } from "@/components/shareable-card";
 import { trackCardDrawn, trackAudioPlayed, trackFavoriteToggled, trackCardShared, trackStreakMilestone, trackEvent } from "@/lib/analytics";
 import { toggleFavorite, isFavorite } from "@/lib/favorites";
 import { getSubscriptionStatus } from "@/lib/subscription";
@@ -26,6 +27,7 @@ export default function TodayScreen() {
   const [streakData, setStreakData] = useState<StreakData | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
   const [isSubscriber, setIsSubscriber] = useState(false);
+  const shareableCardRef = useRef(null);
   
   const player = useAudioPlayer(card?.audio);
 
@@ -304,7 +306,7 @@ export default function TodayScreen() {
               </TouchableOpacity>
               
               <TouchableOpacity
-                onPress={() => shareCard(card)}
+                onPress={() => shareCardImage(shareableCardRef, card)}
                 className="flex-1 border-2 border-primary rounded-full py-3 px-6 items-center active:opacity-70"
               >
                 <Text className="text-primary font-semibold">Share</Text>
@@ -340,6 +342,13 @@ export default function TodayScreen() {
           <IconSymbol name="paperplane.fill" size={28} color="#FFFFFF" />
         </TouchableOpacity>
       )}
+
+      {/* Hidden ShareableCard for image capture */}
+      <View style={{ position: "absolute", left: -10000, top: -10000 }}>
+        <View ref={shareableCardRef}>
+          {card && <ShareableCard card={card} />}
+        </View>
+      </View>
     </ScreenContainer>
   );
 }

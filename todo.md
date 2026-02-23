@@ -169,5 +169,14 @@
 - [x] Update weekly subscription link (Stripe)
 - [x] Update annual subscription link (Stripe)
 - [x] Test payment flow with Stripe links
-- [ ] Create checkpoint with Stripe integration
+- [x] Create checkpoint with Stripe integration
 - [ ] Prepare Google Play Store deployment
+
+## Bug Fixes & Feature Improvements
+
+- [x] Fix navigation context error when replaying daily draw
+- [x] Redesign share feature to generate visual card images (like manual edit example)
+- [x] Share should include card image + minimal text + hashtags)
+- [x] Test navigation fix
+- [x] Test new share functionality
+- [x] Create checkpoint with fixes
