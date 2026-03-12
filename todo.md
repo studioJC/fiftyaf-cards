@@ -210,4 +210,4 @@
 - [x] Add expo-build-properties plugin configuration
 - [x] Set Android Gradle properties explicitly
 - [ ] Test APK build with new configuration
-- [ ] Create checkpoint if successful
+- [x] Create checkpoint if successful
