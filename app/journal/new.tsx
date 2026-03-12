@@ -176,7 +176,7 @@ export default function NewJournalEntryScreen() {
                 <Text className="text-xs text-muted leading-relaxed">
                   • Be honest and authentic with yourself{"\n"}
                   • Focus on feelings, not just events{"\n"}
-                  • Ask yourself: "What can I learn from this?"{"\n"}
+                  • Ask yourself: &quot;What can I learn from this?&quot;{"\n"}
                   • Remember: Be Kind & Curious
                 </Text>
               </View>

@@ -99,7 +99,7 @@ export default function JournalScreen() {
             <Text className="text-2xl mb-2">📝</Text>
             <Text className="text-lg font-semibold text-foreground mb-2">No Entries Yet</Text>
             <Text className="text-sm text-muted text-center mb-6">
-              Start journaling your reflections on today's cards
+              Start journaling your reflections on today&apos;s cards
             </Text>
             <TouchableOpacity
               onPress={handleNewEntry}

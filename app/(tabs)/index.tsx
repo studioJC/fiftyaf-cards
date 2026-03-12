@@ -282,7 +282,7 @@ export default function TodayScreen() {
             </TouchableOpacity>
 
             <Text className="text-xs text-muted text-center">
-              ~77 seconds • Ends with "Be Kind & Curious"
+              ~77 seconds • Ends with &quot;Be Kind &amp; Curious&quot;
             </Text>
           </View>
 
