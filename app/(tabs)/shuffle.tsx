@@ -165,7 +165,7 @@ export default function ShuffleScreen() {
                   elevation: 3,
                 }}
               >
-                <Text className="text-white font-semibold text-lg">View Today's Card</Text>
+                <Text className="text-white font-semibold text-lg">View Today&apos;s Card</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
